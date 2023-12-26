@@ -1,59 +1,61 @@
-import './App.css';
-import { useState } from 'react';
+import React from "react";
 
-const API_KEY = 'b9e675496db047ffbfa62858232612';
+// Define a custom dictionary of words and their corrections
+const customDictionary = {
+  teh: "the",
+  wrok: "work",
+  fot: "for",
+  exampl: "example",
+};
 
-function App() {
-  const [input, setInput] = useState('');
-  const [weatherData, setWeatherData] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const handleInput = (e) => {
-    setInput(e.target.value);
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inputText: "",
+      suggestedText: "",
+    };
   }
 
-  const callApi = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${input}`);
-      const data = await response.json();
-      // console.log(data);
-      let weatherData = [data.current.temp_c, data.current.humidity, data.current.condition.text, data.current.wind_kph];
-      setWeatherData(weatherData);
-      setLoading(false);
-    } catch (error) {
-      alert('Failed to fetch weather data');
-      setLoading(false);
-      setWeatherData([]);
-      return null;
-    }
+  handleInputChange = (e) => {
+    const text = e.target.value;
+    this.setState({ inputText: text });
+
+    // Implement a basic spelling check and correction
+    const words = text.split(" ");
+    const correctedWords = words.map((word) => {
+      const correctedWord = customDictionary[word.toLowerCase()];
+      return correctedWord || word;
+    });
+
+    const correctedText = correctedWords.join(" ");
+
+    // Set the suggested text (first corrected word)
+    const firstCorrection = correctedWords.find(
+      (word, index) => word !== words[index]
+    );
+    this.setState({ suggestedText: firstCorrection || "" });
   };
 
-  return (
-    <div>
-        <input type="text" value={input} onChange={handleInput} placeholder='Enter city name'/>
-        <button onClick={callApi}>Search</button>
-        {weatherData.length >0 && <div className='weather-cards'>
-          <div className='weather-card'>
-            <h5>Temperature</h5>
-            <div>{weatherData[0]} C </div>
-          </div>
-          <div className='weather-card'>
-            <h5>Humidity</h5>
-            <div>{weatherData[1]}%</div>
-          </div>
-          <div className='weather-card'>
-            <h5>Condition</h5>
-            <div>{weatherData[2]} </div>
-          </div>
-          <div className='weather-card'>
-            <h5>Wind Speed</h5>
-            <div>{weatherData[3]} kph</div>
-          </div>
-        </div>}
-        {loading && <p>Loading data...</p>}
-    </div>
-  );
+  render() {
+    return (
+      <div>
+        <h1>Spell Check and Auto-Correction</h1>
+        <textarea
+          value={this.state.inputText}
+          onChange={this.handleInputChange}
+          placeholder="Enter text..."
+          rows={5}
+          cols={40}
+        />
+        {this.state.suggestedText && (
+          <p>
+            Did you mean: <strong>{this.state.suggestedText}</strong>?
+          </p>
+        )}
+      </div>
+    );
+  }
 }
 
 export default App;
