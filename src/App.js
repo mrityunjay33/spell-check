@@ -10,7 +10,7 @@ const customDictionary = {
 const App = () => {
   const [inputText, setInputText] = useState("");
   const [suggestedText, setSuggestedText] = useState("");
-
+// helper function
   const handleInputChange = (e) => {
     const text = e.target.value;
     setInputText(text);
